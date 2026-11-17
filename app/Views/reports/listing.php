@@ -38,7 +38,7 @@ if (isset($error)) {
                     if (can_show_report($permission_id, ['inventory', 'receiving'])) {
                         $link = get_report_link($permission_id, 'graphical_summary');
                 ?>
-                        <a class="list-group-item" href="<?= $link['path'] ?>"><?= $link['label'] ?></a>
+                        <a class="list-group-item" href="<?= $link['path'] ?>"><?= esc($link['label']) ?></a>
                 <?php
                     }
                 }
@@ -57,7 +57,7 @@ if (isset($error)) {
                     if (can_show_report($permission_id, ['inventory', 'receiving'])) {
                         $link = get_report_link($permission_id, 'summary');
                 ?>
-                        <a class="list-group-item" href="<?= $link['path'] ?>"><?= $link['label'] ?></a>
+                        <a class="list-group-item" href="<?= $link['path'] ?>"><?= esc($link['label']) ?></a>
                 <?php
                     }
                 }
@@ -76,7 +76,12 @@ if (isset($error)) {
                     if (in_array($report_name, $permission_ids, true)) {
                         $link = get_report_link($report_name, $prefix);
                 ?>
-                        <a class="list-group-item" href="<?= $link['path'] ?>"><?= $link['label'] ?></a>
+                        <a class="list-group-item" href="<?= $link['path'] ?>"><?= esc($link['label']) ?></a>
+                        <?php if ($report_name === 'reports_sales') {
+                            $item_sales_link = get_report_link('reports_item_sales', 'detailed', 'Reports.detailed_item_sales_report');
+                        ?>
+                            <a class="list-group-item" href="<?= $item_sales_link['path'] ?>"><?= esc($item_sales_link['label']) ?></a>
+                        <?php } ?>
                 <?php
                     }
                 }
@@ -94,8 +99,8 @@ if (isset($error)) {
                     $inventory_low_report = get_report_link('reports_inventory_low');
                     $inventory_summary_report = get_report_link('reports_inventory_summary');
                     ?>
-                    <a class="list-group-item" href="<?= $inventory_low_report['path'] ?>"><?= $inventory_low_report['label'] ?></a>
-                    <a class="list-group-item" href="<?= $inventory_summary_report['path'] ?>"><?= $inventory_summary_report['label'] ?></a>
+                    <a class="list-group-item" href="<?= $inventory_low_report['path'] ?>"><?= esc($inventory_low_report['label']) ?></a>
+                    <a class="list-group-item" href="<?= $inventory_summary_report['path'] ?>"><?= esc($inventory_summary_report['label']) ?></a>
                 </div>
             </div>
         <?php } ?>

@@ -1,6 +1,7 @@
 <?php
 /**
  * @var array $config
+ * @var bool $smtp_pass_set
  */
 ?>
 
@@ -12,14 +13,14 @@
             <ul id="email_error_message_box" class="error_message_box"></ul>
 
             <div class="form-group form-group-sm">
-                <?= form_label(lang('Config.email_protocol'), 'protocol', ['class' => 'control-label col-xs-2']) ?>
-                <div class="col-xs-2">
+                <?= form_label(lang('Config.email_protocol'), 'protocol', ['class' => 'control-label col-xs-3 col-sm-2']) ?>
+                <div class="col-xs-9 col-sm-4 col-md-3 col-lg-2">
                     <?= form_dropdown(
                         'protocol',
                         [
-                            'mail'     => 'mail',
-                            'sendmail' => 'sendmail',
-                            'smtp'     => 'smtp'
+                            'mail'     => 'Mail',
+                            'sendmail' => 'Sendmail',
+                            'smtp'     => 'SMTP'
                         ],
                         $config['protocol'],
                         'class="form-control input-sm" id="protocol"'
@@ -28,8 +29,8 @@
             </div>
 
             <div class="form-group form-group-sm">
-                <?= form_label(lang('Config.email_mailpath'), 'mailpath', ['class' => 'control-label col-xs-2']) ?>
-                <div class="col-xs-4">
+                <?= form_label(lang('Config.email_mailpath'), 'mailpath', ['class' => 'control-label col-xs-3 col-sm-2']) ?>
+                <div class="col-xs-9 col-sm-6 col-md-5 col-lg-4">
                     <?= form_input([
                         'name'  => 'mailpath',
                         'id'    => 'mailpath',
@@ -40,8 +41,8 @@
             </div>
 
             <div class="form-group form-group-sm">
-                <?= form_label(lang('Config.email_smtp_host'), 'smtp_host', ['class' => 'control-label col-xs-2']) ?>
-                <div class="col-xs-2">
+                <?= form_label(lang('Config.email_smtp_host'), 'smtp_host', ['class' => 'control-label col-xs-3 col-sm-2']) ?>
+                <div class="col-xs-9 col-sm-6 col-md-5 col-lg-4">
                     <?= form_input([
                         'name'  => 'smtp_host',
                         'id'    => 'smtp_host',
@@ -52,9 +53,10 @@
             </div>
 
             <div class="form-group form-group-sm">
-                <?= form_label(lang('Config.email_smtp_port'), 'smtp_port', ['class' => 'control-label col-xs-2']) ?>
-                <div class="col-xs-2">
+                <?= form_label(lang('Config.email_smtp_port'), 'smtp_port', ['class' => 'control-label col-xs-3 col-sm-2']) ?>
+                <div class="col-xs-9 col-sm-4 col-md-3 col-lg-2">
                     <?= form_input([
+                        'type'  => 'number',
                         'name'  => 'smtp_port',
                         'id'    => 'smtp_port',
                         'class' => 'form-control input-sm',
@@ -64,8 +66,8 @@
             </div>
 
             <div class="form-group form-group-sm">
-                <?= form_label(lang('Config.email_smtp_crypto'), 'smtp_crypto', ['class' => 'control-label col-xs-2']) ?>
-                <div class="col-xs-2">
+                <?= form_label(lang('Config.email_smtp_crypto'), 'smtp_crypto', ['class' => 'control-label col-xs-3 col-sm-2']) ?>
+                <div class="col-xs-9 col-sm-4 col-md-3 col-lg-2">
                     <?= form_dropdown(
                         'smtp_crypto',
                         [
@@ -80,9 +82,10 @@
             </div>
 
             <div class="form-group form-group-sm">
-                <?= form_label(lang('Config.email_smtp_timeout'), 'smtp_timeout', ['class' => 'control-label col-xs-2']) ?>
-                <div class="col-xs-2">
+                <?= form_label(lang('Config.email_smtp_timeout'), 'smtp_timeout', ['class' => 'control-label col-xs-3 col-sm-2']) ?>
+                <div class="col-xs-9 col-sm-4 col-md-3 col-lg-2">
                     <?= form_input([
+                        'type'  => 'number',
                         'name'  => 'smtp_timeout',
                         'id'    => 'smtp_timeout',
                         'class' => 'form-control input-sm',
@@ -92,8 +95,8 @@
             </div>
 
             <div class="form-group form-group-sm">
-                <?= form_label(lang('Config.email_smtp_user'), 'smtp_user', ['class' => 'control-label col-xs-2']) ?>
-                <div class="col-xs-4">
+                <?= form_label(lang('Config.email_smtp_user'), 'smtp_user', ['class' => 'control-label col-xs-3 col-sm-2']) ?>
+                <div class="col-xs-9 col-sm-6 col-md-5 col-lg-4">
                     <div class="input-group">
                         <span class="input-group-addon input-sm">
                             <span class="glyphicon glyphicon-user"></span>
@@ -109,18 +112,18 @@
             </div>
 
             <div class="form-group form-group-sm">
-                <?= form_label(lang('Config.email_smtp_pass'), 'smtp_pass', ['class' => 'control-label col-xs-2']) ?>
-                <div class="col-xs-4">
+                <?= form_label(lang('Config.email_smtp_pass'), 'smtp_pass', ['class' => 'control-label col-xs-3 col-sm-2']) ?>
+                <div class="col-xs-9 col-sm-6 col-md-5 col-lg-4">
                     <div class="input-group">
                         <span class="input-group-addon input-sm">
                             <span class="glyphicon glyphicon-asterisk"></span>
                         </span>
-                        <?= form_password([
-                            'name'  => 'smtp_pass',
-                            'id'    => 'smtp_pass',
-                            'class' => 'form-control input-sm',
-                            'value' => $config['smtp_pass']
-                        ]) ?>
+                        <input type="password"
+                               name="smtp_pass"
+                               id="smtp_pass"
+                               class="form-control input-sm"
+                               placeholder="<?= !empty($smtp_pass_set) ? lang('Config.email_smtp_pass_set') : esc(lang('Config.email_smtp_pass')) ?>"
+                               autocomplete="off">
                     </div>
                 </div>
             </div>
@@ -139,13 +142,14 @@
 <script type="text/javascript">
     // Validation and submit handling
     $(document).ready(function() {
-        var check_protocol = function() {
+        const check_protocol = function() {
             if ($('#protocol').val() == 'sendmail') {
                 $('#mailpath').prop('disabled', false);
                 $('#smtp_host, #smtp_user, #smtp_pass, #smtp_port, #smtp_timeout, #smtp_crypto').prop('disabled', true);
             } else if ($('#protocol').val() == 'smtp') {
-                $('#smtp_host, #smtp_user, #smtp_pass, #smtp_port, #smtp_timeout, #smtp_crypto').prop('disabled', false);
+                $('#smtp_host, #smtp_user, #smtp_port, #smtp_timeout, #smtp_crypto').prop('disabled', false);
                 $('#mailpath').prop('disabled', true);
+                $('#smtp_pass').prop('disabled', false);
             } else {
                 $('#mailpath, #smtp_host, #smtp_user, #smtp_pass, #smtp_port, #smtp_timeout, #smtp_crypto').prop('disabled', true);
             }

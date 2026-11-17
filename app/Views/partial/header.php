@@ -12,29 +12,30 @@ $request = Services::request();
 ?>
 
 <!doctype html>
-<html lang="<?= $request->getLocale() ?>">
+<html lang="<?= current_language_code() ?>">
 
 <head>
     <meta charset="utf-8">
     <base href="<?= base_url() ?>">
-    <title><?= esc($config['company']) . ' | ' . lang('Common.powered_by') . ' OSPOS ' . esc(config('App')->application_version) ?></title>
+    <title><?= esc($config['company']) . ' | ' . lang('Common.powered_by', ['app' => 'OSPOS', 'version' => esc(config('App')->application_version)]) ?></title>
+    <meta name="robots" content="noindex, nofollow">
     <link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico">
-    <link rel="stylesheet" href="<?= 'resources/bootswatch/' . (empty($config['theme']) ? 'flatly' : esc($config['theme'])) . '/bootstrap.min.css' ?>">
+    <?php $theme = (empty($config['theme']) ? 'flatly' : esc($config['theme'])); ?>
+    <link rel="stylesheet" href="resources/bootswatch/<?= "$theme" ?>/bootstrap.min.css">
 
     <?php if (ENVIRONMENT == 'development' || get_cookie('debug') == 'true' || $request->getGet('debug') == 'true') : ?>
         <!-- inject:debug:css -->
         <!-- endinject -->
         <!-- inject:debug:js -->
         <!-- endinject -->
-    <?php else : ?>
-        <!--inject:prod:css -->
+        <!-- inject:debug:deferred:js -->
         <!-- endinject -->
-
-        <!-- Tweaks to the UI for a particular theme should drop here  -->
-        <?php if ($config['theme'] != 'flatly' && file_exists($_SERVER['DOCUMENT_ROOT'] . '/public/css/' . esc($config['theme']) . '.css')) { ?>
-            <link rel="stylesheet" href="<?= 'css/' . esc($config['theme']) . '.css' ?>">
-        <?php } ?>
+    <?php else : ?>
+        <!-- inject:prod:css -->
+        <!-- endinject -->
         <!-- inject:prod:js -->
+        <!-- endinject -->
+        <!-- inject:prod:deferred:js -->
         <!-- endinject -->
     <?php endif; ?>
 
@@ -57,9 +58,11 @@ $request = Services::request();
                 </div>
 
                 <div class="navbar-right" style="margin: 0;">
-                    <?= anchor("home/changePassword/$user_info->person_id", "$user_info->first_name $user_info->last_name", ['class' => 'modal-dlg', 'data-btn-submit' => lang('Common.submit'), 'title' => lang('Employees.change_password')]) ?>
+                    <?= anchor("home/changePassword/{$user_info->person_id}", esc(html_entity_decode("{$user_info->first_name} {$user_info->last_name}", ENT_QUOTES | ENT_HTML5, 'UTF-8')), ['class' => 'modal-dlg', 'data-btn-submit' => lang('Common.submit'), 'title' => lang('Employees.change_password')]) ?>
                     <span>&nbsp;|&nbsp;</span>
-                    <?= anchor('home/logout', lang('Login.logout')) ?>
+                    <?= form_open('home/logout', ['id' => 'logout_form', 'style' => 'display: inline;']) ?>
+                        <button type="submit" id="logout_button" class="btn-link" style="padding: 0; border: none; background: none; color: inherit;"><?= lang('Login.logout') ?></button>
+                    <?= form_close() ?>
                 </div>
 
                 <div class="navbar-center" style="text-align: center;">

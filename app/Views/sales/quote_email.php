@@ -15,12 +15,12 @@
 ?>
 
 <!doctype html>
-<html lang="<?= $this->request->getLocale() ?>">
+<html lang="<?= current_language_code() ?>">
 
 <head>
     <meta charset="utf-8">
     <title><?= lang('Sales.send_quote') ?></title>
-    <link rel="stylesheet" href="<?= base_url('css/invoice_email.css') ?>">
+    <style><?= file_get_contents(ROOTPATH . 'public/css/invoice_email.css') ?></style>
 </head>
 
 <body>
@@ -58,14 +58,14 @@
                     </div>
                 </td>
                 <td id="meta">
-                    <table id="meta-content" align="right">
+                    <table id="meta-content" style="text-align: right;">
                         <tr>
                             <td class="meta-head"><?= lang('Sales.quote_number') ?> </td>
                             <td><?= esc($quote_number) ?></td>
                         </tr>
                         <tr>
                             <td class="meta-head"><?= lang('Common.date') ?></td>
-                            <td><?= $transaction_date ?></td>
+                            <td><?= esc($transaction_date) ?></td>
                         </tr>
                         <?php if ($amount_due > 0) { ?>
                             <tr>
@@ -116,7 +116,7 @@
             ?>
 
             <tr>
-                <td colspan="<?= $quote_columns ?>" align="center"><?= '&nbsp;' //TODO: Replace the php echo for nbsp with just straight html? ?></td>
+                <td colspan="<?= $quote_columns ?>" style="text-align: center;"><?= '&nbsp;' //TODO: Replace the php echo for nbsp with just straight html? ?></td>
             </tr>
 
             <tr>
@@ -128,7 +128,7 @@
             <?php foreach ($taxes as $tax_group_index => $tax) { ?>
                 <tr>
                     <td colspan="<?= $quote_columns - 3 ?>" class="blank"> </td>
-                    <td colspan="2" class="total-line"><?= (float)$tax['tax_rate'] . '% ' . $tax['tax_group'] ?></td>
+                    <td colspan="2" class="total-line"><?= (float)$tax['tax_rate'] . '% ' . esc($tax['tax_group']) ?></td>
                     <td id="taxes" class="total-value"><?= to_currency_tax($tax['sale_tax_amount']) ?></td>
                 </tr>
             <?php } ?>
@@ -144,12 +144,12 @@
             <div id="sale_return_policy">
                 <h5>
                     <span><?= nl2br(esc($config['payment_message'])) ?></span>
-                    <span><?= lang('Sales.comments') . ': ' . (empty($comments) ? $config['quote_default_comments'] : esc($comments)) ?></span>
+                    <span><?= lang('Sales.comments') . ': ' . (empty($comments) ? esc($config['quote_default_comments']) : esc($comments)) ?></span>
                 </h5>
                 <?= nl2br(esc($config['return_policy'])) ?>
             </div>
             <div id="barcode">
-                <?= $quote_number ?>
+                <?= esc($quote_number) ?>
             </div>
         </div>
     </div>

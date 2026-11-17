@@ -8,6 +8,7 @@ public/license/*
 !public/license/.gitkeep
 app/Config/email.php
 npm-debug.log*
+.vscode
 
 # Docker
 !docker/.env
@@ -55,9 +56,10 @@ $RECYCLE.BIN/
 .com.apple.timemachine.donotpresent
 
 # Other
+build/
+!tools/build/
 generate_languages.php
 dist
-docs
 /patches
 translations
 /.buildpath
@@ -74,6 +76,8 @@ system/
 *~
 *.~
 .env
+.env.lock
+.env.tmp.*
 auth.json
 
 *.png
@@ -84,5 +88,7 @@ auth.json
 /writable/logs/*.log
 /writable/debugbar/*.json
 /app/Database/database.sql
-/writable/cache/settings
+/writable/cache/*
 /.env.bak
+/.php-cs-fixer.cache
+/build

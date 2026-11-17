@@ -2,11 +2,12 @@
 /**
  * @var object $item_info
  * @var array $stock_locations
+ * @var int|null $stock_location
  * @var array $item_quantities
+ * @var int|float|string $initial_quantity
+ * @var array $inventory_data
+ * @var array $employee_names
  */
-
-use App\Models\Employee;
-use App\Models\Inventory;
 ?>
 
 <?= form_open('items', ['id' => 'item_form', 'class' => 'form-horizontal']) ?>
@@ -60,7 +61,7 @@ use App\Models\Inventory;
         <div class="form-group form-group-sm">
             <?= form_label(lang('Items.stock_location'), 'stock_location', ['class' => 'control-label col-xs-3']) ?>
             <div class="col-xs-8">
-                <?= form_dropdown('stock_location', $stock_locations, current($stock_locations), ['onchange' => 'display_stock(this.value);', 'class' => 'form-control']) ?>
+                <?= form_dropdown('stock_location', $stock_locations, $stock_location, ['onchange' => 'display_stock(this.value);', 'class' => 'form-control']) ?>
             </div>
         </div>
 
@@ -72,7 +73,7 @@ use App\Models\Inventory;
                     'id'       => 'quantity',
                     'class'    => 'form-control input-sm',
                     'disabled' => '',
-                    'value'    => to_quantity_decimals(current($item_quantities))
+                    'value'    => to_quantity_decimals((string) $initial_quantity)
                 ]) ?>
             </div>
         </div>
@@ -92,50 +93,40 @@ use App\Models\Inventory;
             <th style="width: 30%;"><?= lang('Items.inventory_remarks') ?></th>
         </tr>
     </thead>
-    <tbody id="inventory_result">
-        <?php
-        // The tbody content of the table will be filled in by the javascript (see bottom of page)
-        $employee = model(Employee::class);
-        $inventory = model(Inventory::class);
-
-        $inventory_array = $inventory->get_inventory_data_for_item($item_info->item_id)->getResultArray();
-        $employee_name = [];
-
-        foreach ($inventory_array as $row) {
-            $employee_data = $employee->get_info($row['trans_user']);
-            $employee_name[] = $employee_data->first_name . ' ' . $employee_data->last_name;
-        }
-        ?>
-    </tbody>
+    <tbody id="inventory_result"></tbody>
 </table>
 
 <script type="text/javascript">
     $(document).ready(function() {
-        display_stock(<?= json_encode(key(esc($stock_locations, 'raw'))) ?>);
+        display_stock(<?= json_encode($stock_location ?? key(esc($stock_locations, 'raw'))) ?>);
     });
 
     function display_stock(location_id) {
-        var item_quantities = <?= json_encode(esc($item_quantities, 'raw')) ?>;
-        document.getElementById("quantity").value = parseFloat(item_quantities[location_id]).toFixed(<?= quantity_decimals() ?>);
+        const item_quantities = <?= json_encode(esc($item_quantities, 'raw')) ?>;
+        const quantity = item_quantities[location_id];
+        const formattedQuantity = quantity === undefined || quantity === null || quantity === '' || quantity === false
+            ? 0
+            : parseFloat(quantity);
+        document.getElementById("quantity").value = formattedQuantity.toFixed(<?= quantity_decimals() ?>);
 
-        var inventory_data = <?= json_encode(esc($inventory_array, 'raw')) ?>;
-        var employee_data = <?= json_encode(esc($employee_name, 'raw')) ?>;
+        const inventory_data = <?= json_encode(esc($inventory_data, 'raw')) ?>;
+        const employee_data = <?= json_encode(esc($employee_names, 'raw')) ?>;
 
-        var table = document.getElementById("inventory_result");
+        const table = document.getElementById("inventory_result");
 
         // Remove old query from tbody
-        var rowCount = table.rows.length;
-        for (var index = rowCount; index > 0; index--) {
+        const rowCount = table.rows.length;
+        for (let index = rowCount; index > 0; index--) {
             table.deleteRow(index - 1);
         }
 
         // Add new query to tbody
-        for (var index = 0; index < inventory_data.length; index++) {
-            var data = inventory_data[index];
+        for (let index = 0; index < inventory_data.length; index++) {
+            const data = inventory_data[index];
             if (data['trans_location'] == location_id) {
-                var tr = document.createElement('tr');
+                const tr = document.createElement('tr');
 
-                var td = document.createElement('td');
+                let td = document.createElement('td');
                 td.appendChild(document.createTextNode(data['trans_date']));
                 tr.appendChild(td);
 
