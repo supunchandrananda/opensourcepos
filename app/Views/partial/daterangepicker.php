@@ -6,8 +6,8 @@
 
 <?php if (empty($config['date_or_time_format'])) { ?>
     $('#daterangepicker').css("width", "180");
-    var start_date = "<?= date('Y-m-d') ?>";
-    var end_date = "<?= date('Y-m-d') ?>";
+    let start_date = "<?= date('Y-m-d') ?>";
+    let end_date = "<?= date('Y-m-d') ?>";
 
     $('#daterangepicker').daterangepicker({
     "ranges": {
@@ -90,7 +90,7 @@
     "<?= lang('Calendar.february') ?>",
     "<?= lang('Calendar.march') ?>",
     "<?= lang('Calendar.april') ?>",
-    "<?= lang('Calendar.may') ?>",
+    "<?= lang('Calendar.mayl') ?>",
     "<?= lang('Calendar.june') ?>",
     "<?= lang('Calendar.july') ?>",
     "<?= lang('Calendar.august') ?>",
@@ -110,10 +110,14 @@
     start_date = start.format('YYYY-MM-DD');
     end_date = end.format('YYYY-MM-DD');
     });
+    $('#daterangepicker').on('apply.daterangepicker', function(ev, picker) {
+    start_date = picker.startDate.format('YYYY-MM-DD');
+    end_date = picker.endDate.format('YYYY-MM-DD');
+    });
 <?php } else { ?>
     $('#daterangepicker').css("width", "305");
-    var start_date = "<?= date('Y-m-d H:i:s', mktime(0, 0, 0, date("m"), date("d"), date("Y"))) ?>";
-    var end_date = "<?= date('Y-m-d H:i:s', mktime(23, 59, 59, date("m"), date("d"), date("Y"))) ?>";
+    let start_date = "<?= date('Y-m-d H:i:s', mktime(0, 0, 0, date("m"), date("d"), date("Y"))) ?>";
+    let end_date = "<?= date('Y-m-d H:i:s', mktime(23, 59, 59, date("m"), date("d"), date("Y"))) ?>";
     $('#daterangepicker').daterangepicker({
     "ranges": {
     "<?= lang('Datepicker.today') ?>": [
@@ -195,7 +199,7 @@
     "<?= lang('Calendar.february') ?>",
     "<?= lang('Calendar.march') ?>",
     "<?= lang('Calendar.april') ?>",
-    "<?= lang('Calendar.may') ?>",
+    "<?= lang('Calendar.mayl') ?>",
     "<?= lang('Calendar.june') ?>",
     "<?= lang('Calendar.july') ?>",
     "<?= lang('Calendar.august') ?>",
@@ -216,5 +220,9 @@
     }, function(start, end, label) {
     start_date = start.format('YYYY-MM-DD HH:mm:ss');
     end_date = end.format('YYYY-MM-DD HH:mm:ss');
+    });
+    $('#daterangepicker').on('apply.daterangepicker', function(ev, picker) {
+    start_date = picker.startDate.format('YYYY-MM-DD HH:mm:ss');
+    end_date = picker.endDate.format('YYYY-MM-DD HH:mm:ss');
     });
 <?php } ?>

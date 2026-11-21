@@ -2,6 +2,7 @@
 /**
  * @var object $item_info
  * @var array $stock_locations
+ * @var int|null $stock_location
  * @var array $item_quantities
  */
 
@@ -60,7 +61,7 @@ use App\Models\Inventory;
         <div class="form-group form-group-sm">
             <?= form_label(lang('Items.stock_location'), 'stock_location', ['class' => 'control-label col-xs-3']) ?>
             <div class="col-xs-8">
-                <?= form_dropdown('stock_location', $stock_locations, current($stock_locations), ['onchange' => 'display_stock(this.value);', 'class' => 'form-control']) ?>
+                <?= form_dropdown('stock_location', $stock_locations, $stock_location, ['onchange' => 'display_stock(this.value);', 'class' => 'form-control']) ?>
             </div>
         </div>
 
@@ -72,7 +73,7 @@ use App\Models\Inventory;
                     'id'       => 'quantity',
                     'class'    => 'form-control input-sm',
                     'disabled' => '',
-                    'value'    => to_quantity_decimals(current($item_quantities))
+                    'value'    => to_quantity_decimals($item_quantities[$stock_location] ?? current($item_quantities))
                 ]) ?>
             </div>
         </div>
@@ -98,12 +99,12 @@ use App\Models\Inventory;
         $employee = model(Employee::class);
         $inventory = model(Inventory::class);
 
-        $inventory_array = $inventory->get_inventory_data_for_item($item_info->item_id)->getResultArray();
-        $employee_name = [];
+        $inventoryArray = $inventory->get_inventory_data_for_item($item_info->item_id)->getResultArray();
+        $employeeName = [];
 
-        foreach ($inventory_array as $row) {
-            $employee_data = $employee->get_info($row['trans_user']);
-            $employee_name[] = $employee_data->first_name . ' ' . $employee_data->last_name;
+        foreach ($inventoryArray as $row) {
+            $employeeData = $employee->getInfo($row['trans_user']);
+            $employeeName[] = $employeeData->first_name . ' ' . $employeeData->last_name;
         }
         ?>
     </tbody>
@@ -111,31 +112,31 @@ use App\Models\Inventory;
 
 <script type="text/javascript">
     $(document).ready(function() {
-        display_stock(<?= json_encode(key(esc($stock_locations, 'raw'))) ?>);
+        display_stock(<?= json_encode($stock_location ?? key(esc($stock_locations, 'raw'))) ?>);
     });
 
     function display_stock(location_id) {
-        var item_quantities = <?= json_encode(esc($item_quantities, 'raw')) ?>;
+        const item_quantities = <?= json_encode(esc($item_quantities, 'raw')) ?>;
         document.getElementById("quantity").value = parseFloat(item_quantities[location_id]).toFixed(<?= quantity_decimals() ?>);
 
-        var inventory_data = <?= json_encode(esc($inventory_array, 'raw')) ?>;
-        var employee_data = <?= json_encode(esc($employee_name, 'raw')) ?>;
+        const inventory_data = <?= json_encode(esc($inventoryArray, 'raw')) ?>;
+        const employee_data = <?= json_encode(esc($employeeName, 'raw')) ?>;
 
-        var table = document.getElementById("inventory_result");
+        const table = document.getElementById("inventory_result");
 
         // Remove old query from tbody
-        var rowCount = table.rows.length;
-        for (var index = rowCount; index > 0; index--) {
+        const rowCount = table.rows.length;
+        for (let index = rowCount; index > 0; index--) {
             table.deleteRow(index - 1);
         }
 
         // Add new query to tbody
-        for (var index = 0; index < inventory_data.length; index++) {
-            var data = inventory_data[index];
+        for (let index = 0; index < inventory_data.length; index++) {
+            const data = inventory_data[index];
             if (data['trans_location'] == location_id) {
-                var tr = document.createElement('tr');
+                const tr = document.createElement('tr');
 
-                var td = document.createElement('td');
+                let td = document.createElement('td');
                 td.appendChild(document.createTextNode(data['trans_date']));
                 tr.appendChild(td);
 

@@ -6,22 +6,23 @@
 
 <script type="text/javascript">
     // Live clock
-    var clock_tick = function clock_tick() {
+    const clock_tick = function clock_tick() {
         setInterval('update_clock();', 1000);
     }
 
     // Start the clock immediately
     clock_tick();
 
-    var update_clock = function update_clock() {
+    const update_clock = function update_clock() {
         document.getElementById('liveclock').innerHTML = moment().format("<?= dateformat_momentjs($config['dateformat'] . ' ' . $config['timeformat']) ?>");
     }
 
     const notify = $.notify;
 
     $.notify = function(content, options) {
-        const sanitizedContent = DOMPurify.sanitize(content);
-        return notify(sanitizedContent, options);
+        const message = typeof content === "object" ? content.message : content;
+        const sanitizedMessage = DOMPurify.sanitize(message, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+        return notify(sanitizedMessage, options);
     };
 
     $.notifyDefaults({
@@ -31,13 +32,11 @@
         }
     });
 
-    var cookie_name = "<?= esc(config('Cookie')->prefix, 'js') . esc(config('Security')->cookieName, 'js') ?>";
-
-    var csrf_token = function() {
-        return Cookies.get(cookie_name);
+    const csrf_token = function() {
+        return "<?= esc(csrf_hash(), 'js') ?>";
     };
 
-    var csrf_form_base = function() {
+    const csrf_form_base = function() {
         return {
             <?= esc(config('Security')->tokenName, 'js') ?>: function() {
                 return csrf_token()
@@ -45,14 +44,14 @@
         }
     };
 
-    var setup_csrf_token = function() {
+    const setup_csrf_token = function() {
         $('input[name="<?= esc(config('Security')->tokenName, 'js') ?>"]').val(csrf_token());
     };
 
-    var ajax = $.ajax;
+    const ajax = $.ajax;
 
     $.ajax = function() {
-        var args = arguments[0];
+        let args = arguments[0];
         if (args['type'] && args['type'].toLowerCase() == 'post' && csrf_token()) {
             if (typeof args['data'] === 'string') {
                 args['data'] += '&' + $.param(csrf_form_base());
@@ -65,6 +64,11 @@
     };
 
     $(document).ajaxComplete(setup_csrf_token);
+    $(document).ajaxError(function(event, jqXHR, settings) {
+        if (jqXHR.status === 401) {
+            window.location.href = '<?= site_url('login') ?>';
+        }
+    });
     $(document).ready(function() {
         $("#logout").click(function(event) {
             event.preventDefault();
@@ -81,7 +85,7 @@
         });
     });
 
-    var submit = $.fn.submit;
+    const submit = $.fn.submit;
 
     $.fn.submit = function() {
         setup_csrf_token();

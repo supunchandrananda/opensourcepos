@@ -132,7 +132,7 @@ class Receiving extends Model
 
         foreach ($items as $line => $item_data) {
             $config = config(OSPOS::class)->settings;
-            $cur_item_info = $item->get_info($item_data['item_id']);
+            $cur_item_info = $item->getInfo($item_data['item_id']);
 
             $receivings_items_data = [
                 'receiving_id'       => $receiving_id,
@@ -241,7 +241,7 @@ class Receiving extends Model
                 $inventory->insert($inv_data, false);
 
                 // Update quantities
-                $item_quantity->change_quantity($item['item_id'], $item['item_location'], $item['quantity_purchased'] * (-$item['receiving_quantity']));
+                $item_quantity->changeQuantity($item['item_id'], $item['item_location'], $item['quantity_purchased'] * (-$item['receiving_quantity']));
             }
         }
 
@@ -281,7 +281,7 @@ class Receiving extends Model
         $builder->where('receiving_id', $receiving_id);
 
         $supplier = model(Supplier::class);
-        return $supplier->get_info($builder->get()->getRow()->supplier_id);
+        return $supplier->getInfo($builder->get()->getRow()->supplier_id);
     }
 
     /**
@@ -294,7 +294,9 @@ class Receiving extends Model
             lang('Sales.check') => lang('Sales.check'),
             lang('Sales.debit') => lang('Sales.debit'),
             lang('Sales.credit') => lang('Sales.credit'),
-            lang('Sales.due') => lang('Sales.due')
+            lang('Sales.due') => lang('Sales.due'),
+            lang('Sales.bank_transfer') => lang('Sales.bank_transfer'),
+            lang('Sales.wallet') => lang('Sales.wallet')
         ];
     }
 

@@ -10,7 +10,7 @@
 <div id="required_fields_message"><?= lang('Common.fields_required_message') ?></div>
 <ul id="error_message_box" class="error_message_box"></ul>
 
-<?= form_open('cashups/save/' . $cash_ups_info->cashup_id, ['id' => 'cashups_edit_form', 'class' => 'form-horizontal'])    // TODO: String Interpolation ?>
+<?= form_open("cashups/save/$cash_ups_info->cashup_id", ['id' => 'cashups_edit_form', 'class' => 'form-horizontal']) ?>
     <fieldset id="item_basic_info">
 
         <div class="form-group form-group-sm">
@@ -19,7 +19,7 @@
         </div>
 
         <div class="form-group form-group-sm">
-            <?= form_label(lang('Cashups.open_date'), 'open_date', ['class' => 'required control-label col-xs-3']) ?>
+            <?= form_label(lang('Cashups.open_date'), 'open_date', ['class' => 'control-label col-xs-3 text-danger required']) ?>
             <div class="col-xs-6">
                 <div class="input-group">
                     <span class="input-group-addon input-sm">
@@ -83,7 +83,7 @@
         </div>
 
         <div class="form-group form-group-sm">
-            <?= form_label(lang('Cashups.close_date'), 'close_date', ['class' => 'required control-label col-xs-3']) ?>
+            <?= form_label(lang('Cashups.close_date'), 'close_date', ['class' => 'control-label col-xs-3 text-danger required']) ?>
             <div class="col-xs-6">
                 <div class="input-group">
                     <span class="input-group-addon input-sm">
@@ -308,7 +308,7 @@
             );
         });
 
-        var submit_form = function() {
+        const submit_form = function() {
             $(this).ajaxSubmit({
                 success: function(response) {
                     dialog_support.hide();

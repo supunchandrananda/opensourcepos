@@ -21,7 +21,7 @@
         </div>
 
         <div class="form-group form-group-sm">
-            <?= form_label(lang('Expenses.date'), 'date', ['class' => 'required control-label col-xs-3']) ?>
+            <?= form_label(lang('Expenses.date'), 'date', ['class' => 'control-label col-xs-3 text-danger required']) ?>
             <div class="col-xs-6">
                 <div class="input-group">
                     <span class="input-group-addon input-sm"><span class="glyphicon glyphicon-calendar"></span></span>
@@ -70,7 +70,7 @@
         </div>
 
         <div class="form-group form-group-sm">
-            <?= form_label(lang('Expenses.amount'), 'amount', ['class' => 'required control-label col-xs-3']) ?>
+            <?= form_label(lang('Expenses.amount'), 'amount', ['class' => 'control-label col-xs-3 text-danger required']) ?>
             <div class="col-xs-6">
                 <div class="input-group input-group-sm">
                     <?php if (!is_right_side_currency_symbol()): ?>
@@ -126,7 +126,12 @@
         <div class="form-group form-group-sm">
             <?= form_label(lang('Expenses.employee'), 'employee', ['class' => 'control-label col-xs-3']) ?>
             <div class="col-xs-6">
-                <?= form_dropdown('employee_id', $employees, $expenses_info->employee_id, 'id="employee_id" class="form-control"') ?>
+                <?php if ($can_assign_employee): ?>
+                    <?= form_dropdown('employee_id', $employees, $expenses_info->employee_id, 'id="employee_id" class="form-control"') ?>
+                <?php else: ?>
+                    <?= form_hidden('employee_id', $expenses_info->employee_id) ?>
+                    <?= form_input(['name' => 'employee_name', 'value' => $employees[$expenses_info->employee_id] ?? '', 'class' => 'form-control', 'readonly' => 'readonly']) ?>
+                <?php endif; ?>
             </div>
         </div>
 

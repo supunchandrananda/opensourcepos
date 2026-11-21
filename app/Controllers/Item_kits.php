@@ -7,6 +7,7 @@ use App\Libraries\Barcode_lib;
 use App\Models\Item;
 use App\Models\Item_kit;
 use App\Models\Item_kit_items;
+use CodeIgniter\HTTP\ResponseInterface;
 use Config\Services;
 
 class Item_kits extends Secure_Controller
@@ -29,14 +30,14 @@ class Item_kits extends Secure_Controller
      */
     private function _add_totals_to_item_kit(object $item_kit): object    // TODO: Hungarian notation
     {
-        $kit_item_info = $this->item->get_info($item_kit->kit_item_id ?? $item_kit->item_id);
+        $kit_item_info = $this->item->getInfo($item_kit->kit_item_id ?? $item_kit->item_id);
 
         $item_kit->total_cost_price = 0;
         $item_kit->total_unit_price = $kit_item_info->unit_price;
         $total_quantity = 0;
 
         foreach ($this->item_kit_items->get_info($item_kit->item_kit_id) as $item_kit_item) {
-            $item_info = $this->item->get_info($item_kit_item['item_id']);
+            $item_info = $this->item->getInfo($item_kit_item['item_id']);
             foreach (get_object_vars($item_info) as $property => $value) {
                 $item_info->$property = $value;
             }
@@ -59,19 +60,19 @@ class Item_kits extends Secure_Controller
     }
 
     /**
-     * @return void
+     * @return string
      */
-    public function getIndex(): void
+    public function getIndex(): string
     {
         $data['table_headers'] = get_item_kits_manage_table_headers();
 
-        echo view('item_kits/manage', $data);
+        return view('item_kits/manage', $data);
     }
 
     /**
      * Returns Item_kit table data rows. This will be called with AJAX.
      */
-    public function getSearch(): void
+    public function getSearch(): ResponseInterface
     {
         $search = $this->request->getGet('search') ?? '';
         $limit  = $this->request->getGet('limit', FILTER_SANITIZE_NUMBER_INT);
@@ -89,37 +90,37 @@ class Item_kits extends Secure_Controller
             $data_rows[] = get_item_kit_data_row($item_kit);
         }
 
-        echo json_encode(['total' => $total_rows, 'rows' => $data_rows]);
+        return $this->response->setJSON(['total' => $total_rows, 'rows' => $data_rows]);
     }
 
     /**
-     * @return void
+     * @return ResponseInterface
      */
-    public function suggest_search(): void
+    public function suggest_search(): ResponseInterface
     {
         $search = $this->request->getPost('term');
         $suggestions = $this->item_kit->get_search_suggestions($search);
 
-        echo json_encode($suggestions);
+        return $this->response->setJSON($suggestions);
     }
 
     /**
      * @param int $row_id
-     * @return void
+     * @return ResponseInterface
      */
-    public function getRow(int $row_id): void
+    public function getRow(int $row_id): ResponseInterface
     {
         // Calculate the total cost and retail price of the Kit, so it can be added to the table refresh
         $item_kit = $this->_add_totals_to_item_kit($this->item_kit->get_info($row_id));
 
-        echo json_encode(get_item_kit_data_row($item_kit));
+        return $this->response->setJSON(get_item_kit_data_row($item_kit));
     }
 
     /**
      * @param int $item_kit_id
-     * @return void
+     * @return string
      */
-    public function getView(int $item_kit_id = NEW_ENTRY): void
+    public function getView(int $item_kit_id = NEW_ENTRY): string
     {
         $info = $this->item_kit->get_info($item_kit_id);
 
@@ -141,7 +142,7 @@ class Item_kits extends Secure_Controller
 
         foreach ($this->item_kit_items->get_info($item_kit_id) as $item_kit_item) {
             $item['kit_sequence'] = $item_kit_item['kit_sequence'];
-            $item['name'] = $this->item->get_info($item_kit_item['item_id'])->name;
+            $item['name'] = $this->item->getInfo($item_kit_item['item_id'])->name;
             $item['item_id'] = $item_kit_item['item_id'];
             $item['quantity'] = $item_kit_item['quantity'];
 
@@ -153,19 +154,19 @@ class Item_kits extends Secure_Controller
         $data['selected_kit_item_id'] = $info->kit_item_id;
         $data['selected_kit_item'] = ($item_kit_id > 0 && isset($info->kit_item_id)) ? $info->item_name : '';
 
-        echo view("item_kits/form", $data);
+        return view("item_kits/form", $data);
     }
 
     /**
      * @param int $item_kit_id
-     * @return void
+     * @return ResponseInterface
      */
-    public function postSave(int $item_kit_id = NEW_ENTRY): void
+    public function postSave(int $item_kit_id = NEW_ENTRY): ResponseInterface
     {
         $item_kit_data = [
             'name'              => $this->request->getPost('name'),
             'item_kit_number'   => $this->request->getPost('item_kit_number'),
-            'item_id'           => $this->request->getPost('kit_item_id') ? intval($this->request->getPost('kit_item_id')) : null,
+            'item_id'           => $this->request->getPost('kit_item_id'),
             'kit_discount'      => parse_decimals($this->request->getPost('kit_discount')),
             'kit_discount_type' => $this->request->getPost('kit_discount_type') === null ? PERCENT : intval($this->request->getPost('kit_discount_type')),
             'price_option'      => $this->request->getPost('price_option') === null ? PRICE_ALL : intval($this->request->getPost('price_option')),
@@ -201,20 +202,20 @@ class Item_kits extends Secure_Controller
             }
 
             if ($new_item) {
-                echo json_encode([
+                return $this->response->setJSON([
                     'success' => $success,
                     'message' => lang('Item_kits.successful_adding') . ' ' . $item_kit_data['name'],
                     'id'      => $item_kit_id
                 ]);
             } else {
-                echo json_encode([
+                return $this->response->setJSON([
                     'success' => $success,
                     'message' => lang('Item_kits.successful_updating') . ' ' . $item_kit_data['name'],
                     'id'      => $item_kit_id
                 ]);
             }
         } else { // Failure
-            echo json_encode([
+            return $this->response->setJSON([
                 'success' => false,
                 'message' => lang('Item_kits.error_adding_updating') . ' ' . $item_kit_data['name'],
                 'id'      => NEW_ENTRY
@@ -223,72 +224,72 @@ class Item_kits extends Secure_Controller
     }
 
     /**
-     * @return void
+     * @return ResponseInterface
      */
-    public function postDelete(): void
+    public function postDelete(): ResponseInterface
     {
         $item_kits_to_delete = $this->request->getPost('ids', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
         if ($this->item_kit->delete_list($item_kits_to_delete)) {
-            echo json_encode([
+            return $this->response->setJSON([
                 'success' => true,
                 'message' => lang('Item_kits.successful_deleted') . ' ' . count($item_kits_to_delete) . ' ' . lang('Item_kits.one_or_multiple')
             ]);
         } else {
-            echo json_encode(['success' => false, 'message' => lang('Item_kits.cannot_be_deleted')]);
+            return $this->response->setJSON(['success' => false, 'message' => lang('Item_kits.cannot_be_deleted')]);
         }
     }
 
     /**
      * Checks the validity of the item kit number. Used in app/Views/item_kits/form.php
      *
-     * @return void
+     * @return ResponseInterface
      * @noinspection PhpUnused
      */
-    public function postCheckItemNumber(): void
+    public function postCheckItemNumber(): ResponseInterface
     {
         $exists = $this->item_kit->item_number_exists($this->request->getPost('item_kit_number', FILTER_SANITIZE_FULL_SPECIAL_CHARS), $this->request->getPost('item_kit_id', FILTER_SANITIZE_NUMBER_INT));
-        echo !$exists ? 'true' : 'false';
+        return $this->response->setJSON(!$exists ? 'true' : 'false');
     }
 
     /**
      * AJAX called function that generates barcodes for selected item_kits.
      *
-     * @param string $item_kit_ids Colon separated list of item_kit_id values to generate barcodes for.
-     * @return void
+     * @param string $itemKitIds Colon separated list of item_kit_id values to generate barcodes for.
+     * @return string
      * @noinspection PhpUnused
      */
-    public function getGenerateBarcodes(string $item_kit_ids): void
+    public function getGenerateBarcodes(string $itemKitIds): string
     {
-        $barcode_lib = new Barcode_lib();
+        $barcodeLib = new Barcode_lib();
         $result = [];
 
-        $item_kit_ids = explode(':', $item_kit_ids);
-        foreach ($item_kit_ids as $item_kid_id) {
+        $itemKitIds = explode(':', $itemKitIds);
+        foreach ($itemKitIds as $itemKitId) {
             // Calculate the total cost and retail price of the Kit, so it can be added to the barcode text at the bottom
-            $item_kit = $this->_add_totals_to_item_kit($this->item_kit->get_info($item_kid_id));
+            $itemKit = $this->_add_totals_to_item_kit($this->item_kit->get_info($itemKitId));
 
-            $item_kid_id = 'KIT ' . urldecode($item_kid_id);
+            $itemKitId = 'KIT ' . $itemKitId;
 
             $result[] = [
-                'name'        => $item_kit->name,
-                'item_id'     => $item_kid_id,
-                'item_number' => $item_kid_id,
-                'cost_price'  => $item_kit->total_cost_price,
-                'unit_price'  => $item_kit->total_unit_price
+                'name'        => $itemKit->name,
+                'item_id'     => $itemKitId,
+                'item_number' => $itemKitId,
+                'cost_price'  => $itemKit->total_cost_price,
+                'unit_price'  => $itemKit->total_unit_price
             ];
         }
 
         $data['items'] = $result;
-        $barcode_config = $barcode_lib->get_barcode_config();
+        $barcodeConfig = $barcodeLib->get_barcode_config();
         // In case the selected barcode type is not Code39 or Code128 we set by default Code128
         // The rationale for this is that EAN codes cannot have strings as seed, so 'KIT ' is not allowed
-        if ($barcode_config['barcode_type'] != 'C39' && $barcode_config['barcode_type'] != 'C128') {
-            $barcode_config['barcode_type'] = 'C128';
+        if ($barcodeConfig['barcode_type'] != 'C39' && $barcodeConfig['barcode_type'] != 'C128') {
+            $barcodeConfig['barcode_type'] = 'C128';
         }
-        $data['barcode_config'] = $barcode_config;
+        $data['barcode_config'] = $barcodeConfig;
 
         // Display barcodes
-        echo view("barcodes/barcode_sheet", $data);
+        return view("barcodes/barcode_sheet", $data);
     }
 }
